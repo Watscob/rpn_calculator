@@ -1,26 +1,26 @@
 use std::io::{self, Read};
 
 struct RPN {
-    number: Option<(isize, bool)>,
-    stack: Vec<isize>,
+    buffer: String,
+    stack: Vec<f32>,
 }
 
 impl RPN {
     pub fn new() -> Self {
         RPN {
-            number: None,
+            buffer: String::new(),
             stack: Vec::new(),
         }
     }
 
     pub fn handle_byte(&mut self, c: char) -> bool {
         match c {
-            '_' | ' ' | '\n' | '0' ..= '9' => self.handle_digit(c),
+            '_' | ' ' | '\n' | '0' ..= '9' | '.' => self.handle_digit(c),
             '+' | '-' | '*' | '/' | '%' => self.handle_arith(c),
             'd' | 'r' | 'c' => self.handle_stack(c),
             'p' | 'f' => self.handle_print(c),
             'q' => return true,
-            _ => {}
+            _ => panic!("'{}' is not implemented.", c),
         }
 
         return false
@@ -28,20 +28,14 @@ impl RPN {
 
     fn handle_digit(&mut self, c: char) {
         match c {
-            '_' => {
-                self.number = Some((self.number.map_or(0, |e| e.0), true));
-            }
-            '0' ..= '9' => {
-                let new_dgt = (c as isize) - ('0' as isize);
-                self.number = Some((
-                    self.number.map_or(new_dgt, |e| if e.1 { e.0 - new_dgt } else { e.0 + new_dgt }),
-                    self.number.map_or(false, |e| e.1)
-                ));
-            }
+            '_' => self.buffer = format!("-{}", self.buffer),
+            '0' ..= '9' | '.' => self.buffer.push(c),
             ' ' | '\n' => {
-                if let Some(e) = &self.number {
-                    self.stack.push(e.0);
-                    self.number = None;
+                if !self.buffer.is_empty() {
+                    if let Ok(num) = self.buffer.parse::<f32>() {
+                        self.stack.push(num);
+                        self.buffer.clear();
+                    }
                 }
             }
             _ => {}
