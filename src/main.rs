@@ -2,7 +2,8 @@ use std::io::{self, Read};
 
 struct RPN {
     buffer: String,
-    stack: Vec<f32>,
+    stack: Vec<(f32, isize)>,
+    precision: usize,
 }
 
 impl RPN {
@@ -10,6 +11,7 @@ impl RPN {
         RPN {
             buffer: String::new(),
             stack: Vec::new(),
+            precision: 0,
         }
     }
 
@@ -17,7 +19,8 @@ impl RPN {
         let _ = self.handle_digit(c)
              || self.handle_arith(c)
              || self.handle_stack(c)
-             || self.handle_print(c);
+             || self.handle_print(c)
+             || self.handle_precision(c);
 
         c == 'q'
     }
@@ -35,7 +38,7 @@ impl RPN {
             ' ' | '\n' => {
                 if !self.buffer.is_empty() {
                     if let Ok(num) = self.buffer.parse::<f32>() {
-                        self.stack.push(num);
+                        self.stack.push((num, -1));
                         self.buffer.clear();
                     }
                 }
@@ -49,31 +52,31 @@ impl RPN {
         match c {
             '+' => {
                 if let (Some(op2), Some(op1)) = (self.stack.pop(), self.stack.pop()) {
-                    self.stack.push(op1 + op2);
+                    self.stack.push((op1.0 + op2.0, self.precision as isize));
                 }
                 true
             }
             '-' => {
                 if let (Some(op2), Some(op1)) = (self.stack.pop(), self.stack.pop()) {
-                    self.stack.push(op1 - op2);
+                    self.stack.push((op1.0 - op2.0, self.precision as isize));
                 }
                 true
             }
             '*' => {
                 if let (Some(op2), Some(op1)) = (self.stack.pop(), self.stack.pop()) {
-                    self.stack.push(op1 * op2);
+                    self.stack.push((op1.0 * op2.0, self.precision as isize));
                 }
                 true
             }
             '/' => {
                 if let (Some(op2), Some(op1)) = (self.stack.pop(), self.stack.pop()) {
-                    self.stack.push(op1 / op2);
+                    self.stack.push((op1.0 / op2.0, self.precision as isize));
                 }
                 true
             }
             '%' => {
                 if let (Some(op2), Some(op1)) = (self.stack.pop(), self.stack.pop()) {
-                    self.stack.push(op1 % op2);
+                    self.stack.push((op1.0 % op2.0, self.precision as isize));
                 }
                 true
             }
@@ -84,19 +87,19 @@ impl RPN {
     fn handle_print(&mut self, c: char) -> bool {
         match c {
             'p' => {
-                println!("{}", self.stack.last().map_or("Stack is empty".to_string(), |&x| x.to_string()));
+                println!("{}", self.stack.last().map_or("Stack is empty".to_string(), |&(n, p)| if p == -1 { n.to_string() } else { format!("{:.1$}", n, p as usize) }));
                 true
             }
             'n' => {
-                print!("{}", self.stack.pop().map_or("Stack is empty".to_string(), |x| x.to_string()));
+                print!("{}", self.stack.pop().map_or("Stack is empty".to_string(), |(n, p)| if p == -1 { n.to_string() } else { format!("{:.1$}", n, p as usize) }));
                 true
             }
             'f' => {
                 if self.stack.is_empty() {
                     println!("Stack is empty");
                 } else {
-                    for e in self.stack.iter().rev() {
-                        println!("{}", e);
+                    for &(n, p) in self.stack.iter().rev() {
+                        println!("{}", if p == -1 { n.to_string() } else { format!("{:.1$}", n, p as usize) });
                     }
                 }
                 true
@@ -122,6 +125,22 @@ impl RPN {
                     self.stack.push(op1);
                     self.stack.push(op2);
                 }
+                true
+            }
+            _ => false
+        }
+    }
+
+    fn handle_precision(&mut self, c: char) -> bool {
+        match c {
+            'k' => {
+                if let Some((n, _)) = self.stack.pop() {
+                    self.precision = n as usize;
+                }
+                true
+            }
+            'K' => {
+                self.stack.push((self.precision as f32, -1));
                 true
             }
             _ => false
