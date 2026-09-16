@@ -1,7 +1,6 @@
 mod rpn;
-use rpn::RPN;
 
 fn main() {
-    let mut rpn = RPN::new();
+    let mut rpn = rpn::RPN::new();
     rpn.run();
 }
