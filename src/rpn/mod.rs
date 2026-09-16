@@ -64,32 +64,32 @@ impl RPN {
     fn handle_arith(&mut self, c: char) -> bool {
         match c {
             '+' => {
-                if let (Some(op2), Some(op1)) = (self.stack.pop(), self.stack.pop()) {
-                    self.stack.push((op1.0 + op2.0, self.precision as isize));
+                if let (Some((op2, _)), Some((op1, _))) = (self.stack.pop(), self.stack.pop()) {
+                    self.stack.push((op1 + op2, -1 as isize));
                 }
                 true
             }
             '-' => {
-                if let (Some(op2), Some(op1)) = (self.stack.pop(), self.stack.pop()) {
-                    self.stack.push((op1.0 - op2.0, self.precision as isize));
+                if let (Some((op2, _)), Some((op1, _))) = (self.stack.pop(), self.stack.pop()) {
+                    self.stack.push((op1 - op2, -1 as isize));
                 }
                 true
             }
             '*' => {
-                if let (Some(op2), Some(op1)) = (self.stack.pop(), self.stack.pop()) {
-                    self.stack.push((op1.0 * op2.0, self.precision as isize));
+                if let (Some((op2, _)), Some((op1, _))) = (self.stack.pop(), self.stack.pop()) {
+                    self.stack.push((op1 * op2, self.precision as isize));
                 }
                 true
             }
             '/' => {
-                if let (Some(op2), Some(op1)) = (self.stack.pop(), self.stack.pop()) {
-                    self.stack.push((op1.0 / op2.0, self.precision as isize));
+                if let (Some((op2, _)), Some((op1, _))) = (self.stack.pop(), self.stack.pop()) {
+                    self.stack.push((op1 / op2, self.precision as isize));
                 }
                 true
             }
             '%' => {
-                if let (Some(op2), Some(op1)) = (self.stack.pop(), self.stack.pop()) {
-                    self.stack.push((op1.0 % op2.0, self.precision as isize));
+                if let (Some((op2, _)), Some((op1, _))) = (self.stack.pop(), self.stack.pop()) {
+                    self.stack.push((op1 % op2, self.precision as isize));
                 }
                 true
             }

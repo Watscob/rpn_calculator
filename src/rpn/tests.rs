@@ -35,7 +35,7 @@ fn addition() {
     let mut rpn = RPN::new();
     write_bytes(&mut rpn, "99 81 +\n");
 
-    assert_eq!(rpn.stack.last(), Some(&((99 + 81) as f32, 0 as isize)));
+    assert_eq!(rpn.stack.last(), Some(&((99 + 81) as f32, -1 as isize)));
 }
 
 #[test]
@@ -43,7 +43,7 @@ fn addition_negative() {
     let mut rpn = RPN::new();
     write_bytes(&mut rpn, "99 _81 +\n");
 
-    assert_eq!(rpn.stack.last(), Some(&((99 + -81) as f32, 0 as isize)));
+    assert_eq!(rpn.stack.last(), Some(&((99 + -81) as f32, -1 as isize)));
 }
 
 #[test]
@@ -51,7 +51,7 @@ fn substraction() {
     let mut rpn = RPN::new();
     write_bytes(&mut rpn, "99 81 -\n");
 
-    assert_eq!(rpn.stack.last(), Some(&((99.0 - 81.0) as f32, 0 as isize)));
+    assert_eq!(rpn.stack.last(), Some(&((99.0 - 81.0) as f32, -1 as isize)));
 }
 
 #[test]
@@ -59,7 +59,7 @@ fn substraction_negative() {
     let mut rpn = RPN::new();
     write_bytes(&mut rpn, "81 99 -\n");
 
-    assert_eq!(rpn.stack.last(), Some(&((81.0 - 99.0) as f32, 0 as isize)));
+    assert_eq!(rpn.stack.last(), Some(&((81.0 - 99.0) as f32, -1 as isize)));
 }
 
 #[test]
