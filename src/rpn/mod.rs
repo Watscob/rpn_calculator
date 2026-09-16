@@ -1,4 +1,4 @@
-use std::io::{self, Read};
+use std::{cmp::max, io::{self, Read}};
 
 pub struct RPN {
     buffer: String,
@@ -90,6 +90,25 @@ impl RPN {
             '%' => {
                 if let (Some((op2, _)), Some((op1, _))) = (self.stack.pop(), self.stack.pop()) {
                     self.stack.push((op1 % op2, self.precision as isize));
+                }
+                true
+            }
+            '~' => {
+                if let (Some((op2, _)), Some((op1, _))) = (self.stack.pop(), self.stack.pop()) {
+                    self.stack.push((op1 / op2, self.precision as isize));
+                    self.stack.push((op1 % op2, self.precision as isize));
+                }
+                true
+            }
+            '^' => {
+                if let (Some((op2, _)), Some((op1, _))) = (self.stack.pop(), self.stack.pop()) {
+                    self.stack.push((op1.powf(op2), self.precision as isize));
+                }
+                true
+            }
+            'v' => {
+                if let Some((op, p)) = self.stack.pop() {
+                    self.stack.push((op.sqrt(), max(self.precision as isize, p)));
                 }
                 true
             }

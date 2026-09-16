@@ -111,6 +111,31 @@ fn modulo_negative() {
 }
 
 #[test]
+fn divmod() {
+    let mut rpn = RPN::new();
+    write_bytes(&mut rpn, "9 4 ~ ");
+
+    assert_eq!(rpn.stack.get(rpn.stack.len() - 2), Some(&((9.0 / 4.0) as f32, 0 as isize)));
+    assert_eq!(rpn.stack.get(rpn.stack.len() - 1), Some(&((9.0 % 4.0) as f32, 0 as isize)));
+}
+
+#[test]
+fn exponent() {
+    let mut rpn = RPN::new();
+    write_bytes(&mut rpn, "9 4 ^ ");
+
+    assert_eq!(rpn.stack.last(), Some(&(((9.0 as f32).powf(4.0)), 0 as isize)));
+}
+
+#[test]
+fn square_root() {
+    let mut rpn = RPN::new();
+    write_bytes(&mut rpn, "9 v ");
+
+    assert_eq!(rpn.stack.last(), Some(&(((9.0 as f32).sqrt()), 0 as isize)));
+}
+
+#[test]
 fn clear_stack() {
     let mut rpn = RPN::new();
     write_bytes(&mut rpn, "99 98 97 96 95 ");
