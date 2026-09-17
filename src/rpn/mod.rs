@@ -4,6 +4,7 @@ pub struct RPN {
     buffer: String,
     stack: Vec<(f32, isize)>,
     precision: usize,
+    comment: bool,
 }
 
 impl RPN {
@@ -12,6 +13,7 @@ impl RPN {
             buffer: String::new(),
             stack: Vec::new(),
             precision: 0,
+            comment: false,
         }
     }
 
@@ -29,7 +31,8 @@ impl RPN {
     }
 
     fn handle_byte(&mut self, c: char) -> bool {
-        let _ = self.handle_digit(c)
+        let _ = self.handle_comment(c)
+             || self.handle_digit(c)
              || self.handle_arith(c)
              || self.handle_stack(c)
              || self.handle_print(c)
@@ -176,6 +179,24 @@ impl RPN {
                 true
             }
             _ => false
+        }
+    }
+
+    fn handle_comment(&mut self, c: char) -> bool {
+        if self.comment {
+            match c {
+                '\n' => self.comment = false,
+                _ => {}
+            }
+            true
+        } else {
+            match c {
+                '#' => {
+                    self.comment = true;
+                    true
+                }
+                _ => false
+            }
         }
     }
 }
